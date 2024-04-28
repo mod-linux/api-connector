@@ -4,8 +4,8 @@ from cryptography.hazmat.primitives import padding
 import base64
 import hashlib
 
-org_aes_key = b"CRDRIAF"
-iv = b"lksdasfsaskllopl"
+org_aes_key = b"SRAXCAV"
+iv = b"adegasfeqfkddsge"
 
 
 def encrypt_data(plain_text_before_padding):
