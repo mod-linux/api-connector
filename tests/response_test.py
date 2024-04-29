@@ -1,7 +1,8 @@
 import unittest
+
+from lib.collection import get_collection_by_file
 from lib.handler import process_response
 from lib.plugin.plugin import get_raw_body
-from lib.collection import get_collection_by_file
 
 
 class TestParsePluginValue(unittest.TestCase):
@@ -11,9 +12,9 @@ class TestParsePluginValue(unittest.TestCase):
             "status": "success",
             "message": "Payment Request Received"
         }
-        request_data = get_collection_by_file(collection="TransBank Payout.postman_collection.json")
+        request_data = get_collection_by_file(collection="testing.postman_collection.json")
         result = process_response(response, get_raw_body(response=request_data[0].get('response')[0],
-                                                         plugin="transbank_request_200"))
+                                                         plugin="testing_request_200"))
         self.assertEqual(result, True)
 
 

@@ -1,5 +1,6 @@
-import mysql.connector
 import os
+
+import mysql.connector
 from dotenv import load_dotenv
 
 connection = None
@@ -13,7 +14,7 @@ def generate_select_statement(table_name, conditions, select_column):
     if conditions:
         select_statement += " WHERE " + " AND ".join(conditions)
 
-    return select_statement
+    return [select_statement]
 
 
 def generate_insert_statement(args, config):
@@ -56,14 +57,17 @@ def connect_to_mysql():
 def get_data_from_table(args, data, config):
     global connection
     try:
-        get_statement(args, data, config)
         connection = connect_to_mysql()
         cursor = connection.cursor(dictionary=True)
         cursor.execute(*get_statement(args, data, config))
-        rows = cursor.fetchall()
-        if len(rows) == 0:
-            return None
-        return rows[0][data['select_column']]
+        if 'select' in config:
+            rows = cursor.fetchall()
+            if len(rows) == 0:
+                return None
+            return rows[0][data['select_column']]
+        else:
+            connection.commit()
+            return cursor.rowcount
     except mysql.connector.Error as error:
         print("Failed to execute SELECT statement:", error)
     finally:

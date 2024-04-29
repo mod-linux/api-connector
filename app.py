@@ -1,7 +1,9 @@
-from flask import Flask, jsonify, request
-from lib.initiator import process_request
-from lib.collection import get_collection_by_file
 import traceback
+
+from flask import Flask, jsonify, request
+
+from lib.collection import get_collection_by_file
+from lib.initiator import proces_individual_request
 
 app = Flask(__name__)
 
@@ -25,9 +27,8 @@ def get_postman_collection():
         if request.is_json:
             data = request.get_json()
             collect_data = get_collection_by_file(collection=data['collection'])
-            result = process_request(request_data=collect_data[0], plugin=data['plugin_id'])
-            return jsonify(result)
-        return jsonify({'error': False})
+            return jsonify(proces_individual_request(collect_data, data['plugin_id'])), 200
+        return jsonify({'error': False}), 500
     except FileNotFoundError:
         return jsonify({"error": "Collection file not found"}), 404
 

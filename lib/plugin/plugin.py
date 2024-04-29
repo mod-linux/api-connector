@@ -1,11 +1,11 @@
+import hashlib
 import json
-from flask import request
-from lib.aes.aes import decrypt_data
-from lib.parser import get_keys_and_values
 import random
 import string
-import hashlib
 from datetime import datetime
+
+from lib.aes.aes import decrypt_data
+from lib.parser import get_keys_and_values
 
 
 def get_body_by_plugin(response, plugin):
@@ -13,9 +13,7 @@ def get_body_by_plugin(response, plugin):
 
 
 def get_raw_body(response, plugin):
-    if response['name'] == plugin:
-        return json.loads(response['originalRequest'].get('body', {}).get('raw', ''))
-    return None
+    return json.loads(response['originalRequest'].get('body', {}).get('raw', ''))
 
 
 def parse_plugin_data(body):

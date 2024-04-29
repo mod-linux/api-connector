@@ -1,5 +1,6 @@
-from lib.storage.db.connection import get_data_from_table
 from flask import request
+
+from lib.storage.db.connection import get_data_from_table
 
 
 def get_keys_and_values(payload, source, source_key="sys#source"):
@@ -17,8 +18,7 @@ def get_keys_and_values(payload, source, source_key="sys#source"):
                 get_keys_and_values(value, source)
 
 
-def get_insertion_values(payload, response, source_key="sys#input"):
-    result = {}
+def get_insertion_values(result, payload, response, source_key="sys#input"):
     if isinstance(payload, dict):
         for key, value in payload.items():
             if value is not None and isinstance(value, dict) and source_key in value:
@@ -37,9 +37,7 @@ def get_insertion_values(payload, response, source_key="sys#input"):
             elif value is not None and "{req[" in value:
                 payload[key] = get_args([value])[0]
             else:
-                get_insertion_values(value, response)
-
-    return result
+                get_insertion_values(result, value, response)
 
 
 def incorporate_plugin_input(data, plugin_input):
@@ -96,6 +94,7 @@ def get_hash_key(config, _v):
     t_value = get_data_from_table(resolve_usr_condition(config), {'select_column': column_value}, config)
     if "fun" in _v:
         return parse_plugin_value(_v['fun'], [t_value])
+    return t_value
 
 
 def parse_plugin_value(value, _args):
@@ -145,7 +144,6 @@ def get_args(args):
         if results:
             return results
     return args
-
 
 
 def get_source_value(value, source):
