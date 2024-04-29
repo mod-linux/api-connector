@@ -1,11 +1,12 @@
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import padding
 import base64
 import hashlib
 
-org_aes_key = b"SRAXCAV"
-iv = b"adegasfeqfkddsge"
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+org_aes_key = b"CRDRIAF"
+iv = b"lksdasfsaskllopl"
 
 
 def encrypt_data(plain_text_before_padding):

@@ -1,5 +1,6 @@
-from lib.storage.db.connection import get_data_from_table
 from flask import request
+
+from lib.storage.db.connection import get_data_from_table
 
 
 def get_keys_and_values(payload, source, source_key="sys#source"):
@@ -96,6 +97,7 @@ def get_hash_key(config, _v):
     t_value = get_data_from_table(resolve_usr_condition(config), {'select_column': column_value}, config)
     if "fun" in _v:
         return parse_plugin_value(_v['fun'], [t_value])
+    return t_value
 
 
 def parse_plugin_value(value, _args):
@@ -145,7 +147,6 @@ def get_args(args):
         if results:
             return results
     return args
-
 
 
 def get_source_value(value, source):
