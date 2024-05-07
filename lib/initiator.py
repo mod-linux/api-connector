@@ -23,15 +23,16 @@ def process_request(request_data, plugin):
     response = requests.request(method, url, headers=headers, data=json.dumps(body))
 
     processed_response = []
+    json_response = json.loads(response.text)
     if response.status_code == 200:
-        processed_response = process_response(json.loads(response.text),
+        processed_response = process_response(json_response,
                                               get_raw_body(response=request_data.get('response')[0], plugin=plugin))
 
     return {
         'url': url,
         'body': body,
         'status_code': response.status_code,
-        'response_body': response.text,
+        'response_body': json_response,
         'processed_response': processed_response
     }
 

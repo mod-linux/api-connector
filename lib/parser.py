@@ -27,7 +27,7 @@ def get_insertion_values(result, payload, response, source_key="sys#input"):
                     if item['key'] not in result:
                         result[item['key']] = {'columns': [], 'values': []}
                     result[item['key']]['columns'].append(item['value'])
-                    result[item['key']]['values'].append(response[key])
+                    result[item['key']]['values'].append(map_response(response, key))
 
             # get_input_source_by_key(key, value[source_key], response)
             # payload[key] = get_insertion_attr(get_source_value(value[source_key]['key'], source), response,
@@ -40,17 +40,47 @@ def get_insertion_values(result, payload, response, source_key="sys#input"):
                 get_insertion_values(result, value, response)
 
 
+def map_response(res, key):
+    if key in res:
+        return res[key]
+    else:
+        return get_dict_mapping(res, key)
+
+
+def get_dict_mapping(res, key):
+    k_found = None
+    if key in res:
+        return res[key]
+    for value in res:
+        if isinstance(res[value], dict):
+            k_found = get_dict_mapping(res[value], key)
+            if k_found is not None:
+                break
+    return k_found
+
+
 def incorporate_plugin_input(data, plugin_input):
     for key, input_data in plugin_input.items():
         values = input_data.get('values', [])
+        if 'update' in input_data and input_data.get('condition', None):
+            data[key]['condition'] = parse_condition(input_data.get('condition', None))
         for value in values:
             column, column_value = value.split('=')
             column_value = get_args([column_value])[0]
-            if column is not None and column_value is not None:
+            if key in data and column is not None and column_value is not None:
                 data[key]['columns'].append(column)
                 data[key]['values'].append(column_value)
                 data[key]['config'] = input_data
     return data
+
+
+def parse_condition(data):
+    results = []
+    for value in data:
+        column, column_value = value.split('=')
+        column_value = get_args([column_value])[0]
+        results.append({column: column_value})
+    return results
 
 
 def get_input_source_by_key(key_name, key_ref, response):
@@ -126,11 +156,13 @@ def resolve_usr_condition(value):
     return {'table': value['table'], 'condition': results}
 
 
-def get_args_v1(args):
+def get_args(args):
     results = []
     for _x in args:
         if request and "{req[" in _x:
             results.append(_x.format(req=request.json))
+        elif request and "@plugin." in _x:
+            results.append(parse_plugin_value(_x, None))
 
     if len(results) > 0:
         return results
@@ -138,9 +170,10 @@ def get_args_v1(args):
         return args
 
 
-def get_args(args):
+def get_args_v1(args):
     if request:
         results = [_x.format(req=request.json) for _x in args if "{req[" in _x]
+
         if results:
             return results
     return args

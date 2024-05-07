@@ -25,11 +25,27 @@ def generate_insert_statement(args, config):
     return [insert_statement, args['values']]
 
 
+def generate_update_statement(args, config):
+    set_clause = ", ".join([f"{column} = %s" for column in args['columns']])
+
+    # Generate WHERE part of the SQL statement using conditions
+    where_clause = " AND ".join([f"{list(condition.keys())[0]} = %s" for condition in args['condition']])
+
+    args['values'].extend([list(d.values())[0] for d in args['condition']])
+
+    # Generate the full SQL update statement
+    update_statement = f"UPDATE {config['table']} SET {set_clause} WHERE {where_clause};"
+
+    return [update_statement, args['values']]
+
+
 def get_statement(args, data, config):
     if 'select' in config:
         return generate_select_statement(args['table'], args['condition'], data['select_column'])
     elif 'insert' in config:
         return generate_insert_statement(args, config)
+    elif 'update' in config:
+        return generate_update_statement(args, config)
 
 
 def connect_to_mysql():
@@ -67,7 +83,7 @@ def get_data_from_table(args, data, config):
             return rows[0][data['select_column']]
         else:
             connection.commit()
-            return cursor.rowcount
+            return [cursor.rowcount]
     except mysql.connector.Error as error:
         print("Failed to execute SELECT statement:", error)
     finally:
